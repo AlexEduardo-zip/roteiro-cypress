@@ -68,4 +68,94 @@ describe('TODOMvc App', () => {
       .children()
       .should('have.length', 2);
   });
+
+  it('Editar tarefa', () => {
+    cy.visit('');
+
+    cy.get('[data-cy=todo-input]')
+      .type('Tarefa para editar{enter}');
+  
+    cy.get('[data-cy=todos-list] > li')
+      .first()
+      .find('label') 
+      .dblclick();
+  
+    cy.get('[data-cy=todos-list] > li')
+      .first()
+      .find('input.edit') 
+      .clear()
+      .type('Tarefa editada{enter}');
+  
+    cy.get('[data-cy=todos-list] > li')
+      .first()
+      .find('label')
+      .should('have.text', 'Tarefa editada');
+  });
+
+  it('Sair da filtragem de ativas e completas para exibir todas', () => {
+    cy.visit('');
+  
+    cy.get('[data-cy=todo-input]')
+      .type('Tarefa 1{enter}')
+      .type('Tarefa 2{enter}');
+  
+    cy.get('[data-cy=todos-list] > li')
+      .first()
+      .find('[data-cy=toggle-todo-checkbox]')
+      .click();
+  
+    cy.get('[data-cy=filter-active-link]')
+      .click();
+  
+    cy.get('[data-cy=todos-list]')
+      .children()
+      .should('have.length', 1)
+      .first()
+      .should('have.text', 'Tarefa 2');
+  
+    cy.get('[data-cy=filter-completed-link]')
+      .click();
+  
+    cy.get('[data-cy=todos-list]')
+      .children()
+      .should('have.length', 1)
+      .first()
+      .should('have.text', 'Tarefa 1');
+  
+    cy.get('[data-cy=filter-all-link]')
+      .click();
+  
+    cy.get('[data-cy=todos-list]')
+      .children()
+      .should('have.length', 2);
+  });
+  
+
+  it('Limpa todas as tarefas concluídas', () => {
+    cy.visit('');
+  
+    cy.get('[data-cy=todo-input]').as('inputTarefa'); // Alias para melhor legibilidade
+    cy.get('@inputTarefa').type('Tarefa 1{enter}');
+    cy.get('@inputTarefa').type('Tarefa 2{enter}');
+    cy.get('@inputTarefa').type('Tarefa 3{enter}');
+  
+    cy.get('[data-cy=todos-list] > li').as('listaTarefas');
+  
+    cy.get('@listaTarefas').first().find('[data-cy=toggle-todo-checkbox]').click();
+    cy.get('@listaTarefas').eq(1).find('[data-cy=toggle-todo-checkbox]').click();
+  
+    cy.get('button.clear-completed').should('be.visible');
+  
+    cy.get('@listaTarefas').should('have.length', 3);
+  
+    cy.get('button.clear-completed').click();
+  
+    cy.get('button.clear-completed').should('not.be.visible');
+  
+    cy.get('@listaTarefas')
+      .should('have.length', 1)
+      .first()
+      .should('have.text', 'Tarefa 3');
+  });
+  
 });
